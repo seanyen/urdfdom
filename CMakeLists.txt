@@ -34,10 +34,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(tinyxml_vendor REQUIRED)
 find_package(TinyXML REQUIRED)
-include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
 
 find_package(urdfdom_headers 1.0 REQUIRED)
-include_directories(SYSTEM ${urdfdom_headers_INCLUDE_DIRS})
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -46,8 +44,6 @@ endif()
 
 find_package(console_bridge_vendor REQUIRED) # Provides console_bridge 0.4.0 on platforms without it.
 find_package(console_bridge REQUIRED)
-include_directories(SYSTEM ${console_bridge_INCLUDE_DIRS})
-link_directories(${console_bridge_LIBRARY_DIRS})
 
 #In Visual Studio a special postfix for 
 #libraries compiled in debug is used
@@ -64,18 +60,20 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}"
 
 enable_testing()
 
-add_subdirectory(urdf_parser)
-
 if(WIN32 AND NOT CYGWIN)
   set(CMAKE_CONFIG_INSTALL_DIR CMake)
 else()
-    set(CMAKE_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake)
+  set(CMAKE_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake)
 endif()
 string(REGEX REPLACE "[^/]+" ".." RELATIVE_PATH_CMAKE_DIR_TO_PREFIX "${CMAKE_CONFIG_INSTALL_DIR}")
+string(REGEX REPLACE "[^/]+" ".." RELATIVE_PATH_LIBDIR_TO_PREFIX "${CMAKE_INSTALL_LIBDIR}")
+
+add_subdirectory(urdf_parser)
 
 set(PKG_NAME ${PROJECT_NAME})
 set(PKG_LIBRARIES urdfdom_sensor urdfdom_model_state urdfdom_model urdfdom_world)
 set(PKG_DEPENDS urdfdom_headers console_bridge)
+set(PKG_EXPORTS urdfdom)
 set(cmake_conf_file "cmake/urdfdom-config.cmake")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${cmake_conf_file}.in" "${CMAKE_BINARY_DIR}/${cmake_conf_file}" @ONLY)
 install(FILES package.xml DESTINATION share/${PROJECT_NAME})
